@@ -24,6 +24,7 @@
             >Converter <span style="color: var(--theme)">de</span></label
           >
           <select id="of_coin">
+            <option value="DEFAULT">selecione a moeda</option>
             <option value="BR">R$ Real brasileiro</option>
             <option value="USD">US$ Dólar americano</option>
             <option value="EUR">€ Euro</option>
@@ -35,6 +36,7 @@
             >Converter <span style="color: var(--theme)">para</span></label
           >
           <select id="to_coin">
+            <option value="DEFAULT">selecione a moeda</option>
             <option value="BR">R$ Real brasileiro</option>
             <option value="USD">US$ Dólar americano</option>
             <option value="EUR">€ Euro</option>
@@ -44,9 +46,10 @@
       <div class="contain-inform-value">
         <div class="inform-value">
           <input
-            type="text"
+            type="number"
             placeholder="Informe o valor a ser convertido"
             id="field-value-to-convert"
+            min="1"
           />
           <label for="">Valor</label>
         </div>
@@ -57,15 +60,16 @@
       <div class="contain-result-conversion">
         <div class="contain-of-coin">
           <img src="./img/bandeira-do-brasil.png" alt="logo da moeda de" />
-          <span id="coin-country-of">País</span>
           <span id="value-to-convert">0,00</span>
         </div>
         <div class="arow-contain">
           <img src="./img/arrow-next-2825.svg" alt="seta" width="80px" />
         </div>
         <div class="contain-to-coin">
-          <img src="./img/euro-sign-13230.svg" alt="logo da moeda para" />
-          <span id="coin-country-to">País</span>
+          <img
+            src="./img/european-union-flag-circular-17759.svg"
+            alt="logo da moeda para"
+          />
           <span id="value-converted">0,00</span>
         </div>
       </div>

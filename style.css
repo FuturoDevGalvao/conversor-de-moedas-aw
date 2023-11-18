@@ -94,7 +94,7 @@ body {
   /*   border: 1px solid blue;
  */
   width: 100%;
-  padding: 0.9rem 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 .inform-value {
@@ -217,6 +217,10 @@ body {
 
   /*   background-color: yellow;
  */
+}
+
+.err {
+  border: 1px solid red !important;
 }
 
 @media screen and (max-width: 1024px) {
