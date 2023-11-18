@@ -1,15 +1,13 @@
 const converterDe = document.getElementById("of_coin");
 const converterPara = document.getElementById("to_coin");
 const btnConverter = document.getElementById("btn-convert");
-const campoValorASerConvertido = document.getElementById(
-  "field-value-to-convert"
-);
-const valorParaConverter = document.getElementById("value-to-convert");
-const valorConvertido = "";
+const campoValorASerConvertido = document.getElementById("field-value-to-convert");
+const valorASerConverter = document.getElementById("value-to-convert");
+const valorConvertido = document.getElementById("value-converted");
 
 const obterCotacoesOnline = (callback) => {
   const url =
-    "https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BTC-BRL,BRL-USD,BRL-EUR";
+    "https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BRL-USD,BRL-EUR,USD-EUR,EUR-USD";
 
   fetch(url)
     .then((response) => {
@@ -28,12 +26,16 @@ const organizarTaxasDeConversao = (cotacoes, callback) => {
   const taxaConversaoRealEuro = cotacoes.BRLEUR.ask;
   const taxaConversaoDolarReal = cotacoes.USDBRL.ask;
   const taxaConversaoEuroReal = cotacoes.EURBRL.ask;
+  const taxaConversaoDolarEuro = cotacoes.EURUSD.ask;
+  const taxaConversaoEuroDolar = cotacoes.USDEUR.ask;
 
   callback({
-    BR_USD: taxaConversaoRealDolar,
-    BR_EUR: taxaConversaoRealEuro,
-    USD_BR: taxaConversaoDolarReal,
-    EUR_BR: taxaConversaoEuroReal,
+    BRL_USD: taxaConversaoRealDolar,
+    BRL_EUR: taxaConversaoRealEuro,
+    USD_BRL: taxaConversaoDolarReal,
+    EUR_BRL: taxaConversaoEuroReal,
+    USD_EUR: taxaConversaoDolarEuro,
+    EUR_USD: taxaConversaoEuroDolar,
   });
 };
 
@@ -95,17 +97,17 @@ const calcularConversao = (moedas, valor) => {
   const { moedaASerConvertida, moedaDeConversao } = moedas;
   const combinacao = `${moedaASerConvertida}-${moedaDeConversao}`;
 
-  console.log(taxasDeConversao);
-  console.log(combinacao);
-  console.log(efetuarConversao(combinacao, valor, taxasDeConversao));
+  return efetuarConversao(combinacao, valor, taxasDeConversao);
 };
 
 const efetuarConversao = (combinacao, valor, taxasDeConversao) => {
   const conversoes = {
-    "BR-USD": (valor, taxasDeConversao) => valor * taxasDeConversao.BR_EUR,
-    "BR-EUR": (valor, taxasDeConversao) => valor * taxasDeConversao.BR_USD,
-    "USD-BR": (valor, taxasDeConversao) => valor * taxasDeConversao.USD_BR,
-    "EUR-BR": (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_BR,
+    "BRL-USD": (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_USD,
+    "BRL-EUR": (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_EUR,
+    "USD-BRL": (valor, taxasDeConversao) => valor * taxasDeConversao.USD_BRL,
+    "EUR-BRL": (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_BRL,
+    "USD-EUR": (valor, taxasDeConversao) => valor * taxasDeConversao.USD_EUR,
+    "EUR-USD": (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_USD,
   };
 
   const funcaoDeConversao = conversoes[combinacao];
@@ -119,8 +121,43 @@ const converter = () => {
     const moedas = obterMoedasParaConversao();
     const valor = obterValorASerConvertido();
 
-    const valorConvertido = calcularConversao(moedas, valor);
+    const valorResultado = calcularConversao(moedas, valor);
+
+    setarResultados(moedas, valor, valorResultado);
   }
+};
+
+const setarResultados = (moedas, valor, valorResultado) => {
+  const { moedaASerConvertida, moedaDeConversao } = moedas;
+
+  const valorEmMoeda = formatar(moedaASerConvertida, valor);
+  const valorResultadoEmMoeda = formatar(moedaDeConversao, valorResultado);
+
+  valorASerConverter.innerHTML = valorEmMoeda;
+  valorConvertido.innerHTML = valorResultadoEmMoeda;
+};
+
+const formatar = (moeda, valor) => {
+  const formatacoes = {
+    BRL: {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+    },
+    USD: {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    },
+    EUR: {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+    },
+  };
+
+  const valorFormatado = valor.toLocaleString("pt-br", formatacoes[moeda]);
+  return valorFormatado;
 };
 
 atualizarCotacoesPeriodicamente();
