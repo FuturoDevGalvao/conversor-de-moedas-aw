@@ -1,9 +1,15 @@
-const converterDe = document.getElementById("of_coin");
-const converterPara = document.getElementById("to_coin");
+const moedaASerConvertida = document.getElementById("of_coin");
+const moedaDeConversao = document.getElementById("to_coin");
 const btnConverter = document.getElementById("btn-convert");
-const campoValorASerConvertido = document.getElementById("field-value-to-convert");
-const valorASerConverter = document.getElementById("value-to-convert");
-const valorConvertido = document.getElementById("value-converted");
+const campoValorASerConvertido = document.getElementById(
+  "field-value-to-convert"
+);
+const spanValorASerConvertido = document.getElementById("value-to-convert");
+const spanValorConvertido = document.getElementById("value-converted");
+const bandeiraValorASerConvertido = document.getElementById("of-coin-flag");
+const bandeiraValorConvertido = document.getElementById("to-coin-flag");
+
+let moedaSelecionada = false;
 
 const obterCotacoesOnline = (callback) => {
   const url =
@@ -26,8 +32,8 @@ const organizarTaxasDeConversao = (cotacoes, callback) => {
   const taxaConversaoRealEuro = cotacoes.BRLEUR.ask;
   const taxaConversaoDolarReal = cotacoes.USDBRL.ask;
   const taxaConversaoEuroReal = cotacoes.EURBRL.ask;
-  const taxaConversaoDolarEuro = cotacoes.EURUSD.ask;
-  const taxaConversaoEuroDolar = cotacoes.USDEUR.ask;
+  const taxaConversaoDolarEuro = cotacoes.USDEUR.ask;
+  const taxaConversaoEuroDolar = cotacoes.EURUSD.ask;
 
   callback({
     BRL_USD: taxaConversaoRealDolar,
@@ -56,13 +62,10 @@ const obterTaxasDeConversao = () => {
   return JSON.parse(localStorage.getItem("taxas_de_conversao"));
 };
 
-const obterMoedasParaConversao = () => {
-  const moedaASerConvertida = converterDe.value;
-  const moedaDeConversao = converterPara.value;
-
+const obterMoedas = () => {
   return {
-    moedaASerConvertida: moedaASerConvertida,
-    moedaDeConversao: moedaDeConversao,
+    moedaASerConvertida: moedaASerConvertida.value,
+    moedaDeConversao: moedaDeConversao.value,
   };
 };
 
@@ -73,13 +76,13 @@ const obterValorASerConvertido = () => {
 const isValidarCampos = () => {
   let camposPreenchidos = true;
 
-  if (converterDe.value == "DEFAULT") {
-    converterDe.classList.add("err");
+  if (moedaASerConvertida.value == "DEFAULT") {
+    moedaASerConvertida.classList.add("err");
     camposPreenchidos = false;
   }
 
-  if (converterPara.value == "DEFAULT") {
-    converterPara.classList.add("err");
+  if (moedaDeConversao.value == "DEFAULT") {
+    moedaDeConversao.classList.add("err");
     camposPreenchidos = false;
   }
 
@@ -95,19 +98,19 @@ const calcularConversao = (moedas, valor) => {
   const taxasDeConversao = obterTaxasDeConversao();
 
   const { moedaASerConvertida, moedaDeConversao } = moedas;
-  const combinacao = `${moedaASerConvertida}-${moedaDeConversao}`;
+  const combinacao = `${moedaASerConvertida}_${moedaDeConversao}`;
 
   return efetuarConversao(combinacao, valor, taxasDeConversao);
 };
 
 const efetuarConversao = (combinacao, valor, taxasDeConversao) => {
   const conversoes = {
-    "BRL-USD": (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_USD,
-    "BRL-EUR": (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_EUR,
-    "USD-BRL": (valor, taxasDeConversao) => valor * taxasDeConversao.USD_BRL,
-    "EUR-BRL": (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_BRL,
-    "USD-EUR": (valor, taxasDeConversao) => valor * taxasDeConversao.USD_EUR,
-    "EUR-USD": (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_USD,
+    BRL_USD: (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_USD,
+    BRL_EUR: (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_EUR,
+    USD_BRL: (valor, taxasDeConversao) => valor * taxasDeConversao.USD_BRL,
+    EUR_BRL: (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_BRL,
+    USD_EUR: (valor, taxasDeConversao) => valor * taxasDeConversao.USD_EUR,
+    EUR_USD: (valor, taxasDeConversao) => valor * taxasDeConversao.EUR_USD,
   };
 
   const funcaoDeConversao = conversoes[combinacao];
@@ -118,7 +121,7 @@ const converter = () => {
   const camposPreenchidos = isValidarCampos();
 
   if (camposPreenchidos) {
-    const moedas = obterMoedasParaConversao();
+    const moedas = obterMoedas();
     const valor = obterValorASerConvertido();
 
     const valorResultado = calcularConversao(moedas, valor);
@@ -130,34 +133,45 @@ const converter = () => {
 const setarResultados = (moedas, valor, valorResultado) => {
   const { moedaASerConvertida, moedaDeConversao } = moedas;
 
-  const valorEmMoeda = formatar(moedaASerConvertida, valor);
-  const valorResultadoEmMoeda = formatar(moedaDeConversao, valorResultado);
+  const valorFormatado = formatar(moedaASerConvertida, valor);
+  const valorResultadoFormatado = formatar(moedaDeConversao, valorResultado);
 
-  valorASerConverter.innerHTML = valorEmMoeda;
-  valorConvertido.innerHTML = valorResultadoEmMoeda;
+  spanValorASerConvertido.innerHTML = valorFormatado;
+  spanValorConvertido.innerHTML = valorResultadoFormatado;
 };
 
 const formatar = (moeda, valor) => {
+  if (moeda == "DEFAULT") return "0,00";
+
   const formatacoes = {
-    BRL: {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-    },
-    USD: {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    },
-    EUR: {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    },
+    BRL: { style: "currency", currency: "BRL", minimumFractionDigits: 2 },
+    USD: { style: "currency", currency: "USD", minimumFractionDigits: 2 },
+    EUR: { style: "currency", currency: "EUR", minimumFractionDigits: 2 },
   };
 
   const valorFormatado = valor.toLocaleString("pt-br", formatacoes[moeda]);
+
   return valorFormatado;
+};
+
+const setarBandeiras = (moeda, bandeiraImg) => {
+  const bandeiras = {
+    DEFAULT: "./img/DEFAULT.svg",
+    BRL: "./img/BRL.svg",
+    USD: "./img/USD.svg",
+    EUR: "./img/EUR.svg",
+  };
+
+  bandeiraImg.src = bandeiras[moeda];
+};
+
+// Para espelhar => moeda selecionada
+const espelharAlteracao = (moeda, alteracoes, seraEspelhado) => {
+  const valorFormatado = alteracoes
+    ? formatar(moeda, alteracoes)
+    : formatar(moeda, 0);
+
+  seraEspelhado.innerHTML = valorFormatado;
 };
 
 atualizarCotacoesPeriodicamente();
@@ -166,14 +180,40 @@ btnConverter.addEventListener("click", () => {
   converter();
 });
 
-converterDe.addEventListener("change", () => {
-  converterDe.classList.remove("err");
+moedaASerConvertida.addEventListener("change", () => {
+  moedaASerConvertida.classList.remove("err");
+
+  const moedaSelecionada = obterMoedas().moedaASerConvertida;
+  const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
+
+  setarBandeiras(moedaSelecionada, bandeiraValorASerConvertido);
+
+  espelharAlteracao(
+    moedaSelecionada,
+    valorASerConvertido,
+    spanValorASerConvertido
+  );
 });
 
-converterPara.addEventListener("change", () => {
-  converterPara.classList.remove("err");
+moedaDeConversao.addEventListener("change", () => {
+  moedaDeConversao.classList.remove("err");
+
+  const moedaSelecionada = obterMoedas().moedaDeConversao;
+  const valorConvertido = parseFloat("");
+
+  setarBandeiras(moedaSelecionada, bandeiraValorConvertido);
+  espelharAlteracao(moedaSelecionada, valorConvertido, spanValorConvertido);
 });
 
 campoValorASerConvertido.addEventListener("input", () => {
   campoValorASerConvertido.classList.remove("err");
+
+  const moedaSelecionada = obterMoedas().moedaASerConvertida;
+  const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
+
+  espelharAlteracao(
+    moedaSelecionada,
+    valorASerConvertido,
+    spanValorASerConvertido
+  );
 });
