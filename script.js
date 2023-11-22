@@ -1,15 +1,13 @@
 const moedaASerConvertida = document.getElementById("of_coin");
 const moedaDeConversao = document.getElementById("to_coin");
 const btnConverter = document.getElementById("btn-convert");
-const campoValorASerConvertido = document.getElementById(
-  "field-value-to-convert"
-);
+const campoValorASerConvertido = document.getElementById("field-value-to-convert");
 const spanValorASerConvertido = document.getElementById("value-to-convert");
 const spanValorConvertido = document.getElementById("value-converted");
 const bandeiraValorASerConvertido = document.getElementById("of-coin-flag");
 const bandeiraValorConvertido = document.getElementById("to-coin-flag");
 
-let moedaSelecionada = false;
+let conversaoCalculada = false;
 
 const obterCotacoesOnline = (callback) => {
   const url =
@@ -70,7 +68,8 @@ const obterMoedas = () => {
 };
 
 const obterValorASerConvertido = () => {
-  return parseFloat(campoValorASerConvertido.value);
+  const valor = parseFloat(campoValorASerConvertido.value);
+  return isNaN(valor) ? 0 : valor;
 };
 
 const isValidarCampos = () => {
@@ -104,6 +103,8 @@ const calcularConversao = (moedas, valor) => {
 };
 
 const efetuarConversao = (combinacao, valor, taxasDeConversao) => {
+  conversaoCalculada = true;
+
   const conversoes = {
     BRL_USD: (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_USD,
     BRL_EUR: (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_EUR,
@@ -154,7 +155,7 @@ const formatar = (moeda, valor) => {
   return valorFormatado;
 };
 
-const setarBandeiras = (moeda, bandeiraImg) => {
+const setarBandeira = (moeda, bandeiraImg) => {
   const bandeiras = {
     DEFAULT: "./img/DEFAULT.svg",
     BRL: "./img/BRL.svg",
@@ -165,20 +166,25 @@ const setarBandeiras = (moeda, bandeiraImg) => {
   bandeiraImg.src = bandeiras[moeda];
 };
 
-// Para espelhar => moeda selecionada
 const espelharAlteracao = (moeda, alteracoes, seraEspelhado) => {
-  const valorFormatado = alteracoes
-    ? formatar(moeda, alteracoes)
-    : formatar(moeda, 0);
+  const valorFormatado = alteracoes ? formatar(moeda, alteracoes) : formatar(moeda, 0);
 
   seraEspelhado.innerHTML = valorFormatado;
 };
 
-atualizarCotacoesPeriodicamente();
+const limparConversao = () => {
+  const moedaSelecionada = obterMoedas().moedaDeConversao;
 
-btnConverter.addEventListener("click", () => {
-  converter();
-});
+  spanValorConvertido.innerHTML = formatar(moedaSelecionada, 0);
+};
+
+const recalcularConversao = () => {
+  const valor = obterValorASerConvertido();
+  const moedas = obterMoedas();
+  const valorResultado = calcularConversao(moedas, valor);
+
+  setarResultados(moedas, valor, valorResultado);
+};
 
 moedaASerConvertida.addEventListener("change", () => {
   moedaASerConvertida.classList.remove("err");
@@ -186,23 +192,26 @@ moedaASerConvertida.addEventListener("change", () => {
   const moedaSelecionada = obterMoedas().moedaASerConvertida;
   const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
 
-  setarBandeiras(moedaSelecionada, bandeiraValorASerConvertido);
+  setarBandeira(moedaSelecionada, bandeiraValorASerConvertido);
+  espelharAlteracao(moedaSelecionada, valorASerConvertido, spanValorASerConvertido);
 
-  espelharAlteracao(
-    moedaSelecionada,
-    valorASerConvertido,
-    spanValorASerConvertido
-  );
+  if (conversaoCalculada) {
+    recalcularConversao();
+  }
 });
 
 moedaDeConversao.addEventListener("change", () => {
   moedaDeConversao.classList.remove("err");
 
   const moedaSelecionada = obterMoedas().moedaDeConversao;
-  const valorConvertido = parseFloat("");
+  const valorConvertido = parseFloat(0);
 
-  setarBandeiras(moedaSelecionada, bandeiraValorConvertido);
+  setarBandeira(moedaSelecionada, bandeiraValorConvertido);
   espelharAlteracao(moedaSelecionada, valorConvertido, spanValorConvertido);
+
+  if (conversaoCalculada) {
+    recalcularConversao();
+  }
 });
 
 campoValorASerConvertido.addEventListener("input", () => {
@@ -211,9 +220,15 @@ campoValorASerConvertido.addEventListener("input", () => {
   const moedaSelecionada = obterMoedas().moedaASerConvertida;
   const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
 
-  espelharAlteracao(
-    moedaSelecionada,
-    valorASerConvertido,
-    spanValorASerConvertido
-  );
+  espelharAlteracao(moedaSelecionada, valorASerConvertido, spanValorASerConvertido);
+
+  limparConversao();
 });
+
+btnConverter.addEventListener("click", () => {
+  converter();
+});
+
+window.onload = () => {
+  atualizarCotacoesPeriodicamente();
+};

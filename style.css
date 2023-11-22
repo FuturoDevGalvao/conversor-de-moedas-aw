@@ -92,8 +92,6 @@ body {
 }
 
 .contain-inform-value {
-  /*   border: 1px solid blue;
- */
   width: 100%;
   padding: 1rem 1.5rem;
 }
@@ -151,8 +149,6 @@ body {
 }
 
 .contain-btn-convert {
-  /*   border: 1px solid yellow;
- */
   padding: 1.5rem;
   display: flex;
   align-items: center;
@@ -215,9 +211,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /*   background-color: yellow;
- */
 }
 
 .err {
@@ -228,5 +221,28 @@ body {
   .title-converter,
   .contain-converter {
     width: 70%;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .title-converter,
+  .contain-converter {
+    width: 95%;
+  }
+
+  .contain-of-coin img,
+  .contain-to-coin img {
+    height: 40px;
+    width: 40px;
+  }
+
+  .arow-contain img {
+    width: 55px;
+    height: 55px;
+  }
+
+  .contain-of-coin span,
+  .contain-to-coin span {
+    font-size: 0.9rem;
   }
 }
