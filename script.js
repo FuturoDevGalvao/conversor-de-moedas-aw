@@ -68,7 +68,7 @@ const obterMoedas = () => {
 };
 
 const obterValorASerConvertido = () => {
-  const valor = parseFloat(campoValorASerConvertido.value);
+  const valor = parseFloat(campoValorASerConvertido.value.trim());
   return isNaN(valor) ? 0 : valor;
 };
 
@@ -104,6 +104,14 @@ const calcularConversao = (moedas, valor) => {
 
 const efetuarConversao = (combinacao, valor, taxasDeConversao) => {
   conversaoCalculada = true;
+
+  if (
+    combinacao.startsWith("BRL_BRL") ||
+    combinacao.startsWith("USD_USD") ||
+    combinacao.startsWith("EUR_EUR")
+  ) {
+    return valor;
+  }
 
   const conversoes = {
     BRL_USD: (valor, taxasDeConversao) => valor * taxasDeConversao.BRL_USD,
@@ -167,7 +175,9 @@ const setarBandeira = (moeda, bandeiraImg) => {
 };
 
 const espelharAlteracao = (moeda, alteracoes, seraEspelhado) => {
-  const valorFormatado = alteracoes ? formatar(moeda, alteracoes) : formatar(moeda, 0);
+  const valorFormatado = alteracoes
+    ? formatar(moeda, alteracoes)
+    : formatar(moeda, 0);
 
   seraEspelhado.innerHTML = valorFormatado;
 };
@@ -193,7 +203,11 @@ moedaASerConvertida.addEventListener("change", () => {
   const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
 
   setarBandeira(moedaSelecionada, bandeiraValorASerConvertido);
-  espelharAlteracao(moedaSelecionada, valorASerConvertido, spanValorASerConvertido);
+  espelharAlteracao(
+    moedaSelecionada,
+    valorASerConvertido,
+    spanValorASerConvertido
+  );
 
   if (conversaoCalculada) {
     recalcularConversao();
@@ -220,7 +234,11 @@ campoValorASerConvertido.addEventListener("input", () => {
   const moedaSelecionada = obterMoedas().moedaASerConvertida;
   const valorASerConvertido = parseFloat(campoValorASerConvertido.value);
 
-  espelharAlteracao(moedaSelecionada, valorASerConvertido, spanValorASerConvertido);
+  espelharAlteracao(
+    moedaSelecionada,
+    valorASerConvertido,
+    spanValorASerConvertido
+  );
 
   limparConversao();
 });
